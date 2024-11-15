@@ -12,7 +12,7 @@ const fetchFunction = async (fetchUrl, method, headersObj, bodyObject) => {
 
     let fetchObj = {}
 
-    // GET e DELETE non hanno boby
+    // GET e DELETE non hanno body
     if (method === 'GET' || method === 'DELETE') {
         fetchObj = {
             method: method,
@@ -43,18 +43,19 @@ const fetchFunction = async (fetchUrl, method, headersObj, bodyObject) => {
 
 // Ricerca un parametro dell'URL
 const getUrlParam = (param) => {
-    const urlParams = new URLSearchParams(window.location.search)
-    paramValue = urlParams.get(param)
-    _D(2, `url param '${param}': ${paramValue}`)
-    return paramValue
-}
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramValue = urlParams.get(param);
+    _D(2, `url param '${param}': ${paramValue}`);
+    return paramValue ? paramValue.trim() : null;
+};
+
 
 
 // Disegna HEADER e FOOTER su tutte le pagine
 const drawHeaderAndFooter = () => {
 
     headerHTML = `
-        <nav class="navbar sticky-top navbar-expand-lg bg-body-secondary">
+        <nav class="navbar navbar-expand-lg bg-body-secondary">
             <div class="container-fluid">
                 <a class="navbar-brand" href="#">CRUDAZON Shop</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -64,36 +65,39 @@ const drawHeaderAndFooter = () => {
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="/index.html">Home</a>
+                            <a class="nav-link active"
+                                aria-current="page"
+                                href="/index.html">
+                                    Home
+                            </a>
                         </li>
         `
 
     // Se l'utente è autenticato metto il link al backend
-    if (parseInt(getUrlParam('userAuthenticated')) === 1) {
+    if (userAutentication('check')) {
         headerHTML += `
                         <li class="nav-item">
-                            <a class="nav-link" href="/backend.html?userAuthenticated=1">Backend</a>
+                            <a class="nav-link" href="/backend.html">Backend</a>
                         </li>
         `
     }
-
     headerHTML += `
                         <li class="nav-item">
                             <a class="nav-link disabled" href="#">Chart</a>
                         </li>
                     </ul>
                 </div>
-                `
-    if (!getUrlParam('userAuthenticated')) {
+        `
+    if (!userAutentication('check')) {
         headerHTML += `
-                <a href="/index.html?userAuthenticated=1" class="border border-1 rounded px-3 py-2 text-primary d-inline-flex align-items-center text-decoration-none">
+                <a id="loginButton" onclick="userAutentication('logon')" href="" class="border border-1 rounded px-3 py-2 text-primary d-inline-flex align-items-center text-decoration-none">
                     <i class="fa-solid fa-user me-2"></i>
                     Log In
                 </a>
         `
-    } else if (parseInt(getUrlParam('userAuthenticated')) === 1) {
+    } else if (userAutentication('check')) {
         headerHTML += `
-                <a href="/index.html" class="border border-1 rounded px-3 py-2 text-primary d-inline-flex align-items-center text-decoration-none">
+                <a id="loginButton" onclick="userAutentication('logoff')" href="/index.html" class="border border-1 rounded px-3 py-2 text-primary d-inline-flex align-items-center text-decoration-none">
                     <i class="fa-solid fa-user me-2"></i>
                     Log Off
                 </a>
@@ -104,8 +108,112 @@ const drawHeaderAndFooter = () => {
             </div>
         </nav>
         `
+
     document.getElementsByTagName('header')[0].innerHTML = headerHTML
 }
+
+
+// Action può essere:
+// - 'check' per controllare l'autenticazione
+// - 'logon' per autenticare l'utente
+// - 'logoff' per deautenticare l'utente
+const userAutentication = (action) => {
+    switch (action) {
+        case 'check': {
+            const isAuthenticated = sessionStorage.getItem('isAuthenticated')
+            if (parseInt(isAuthenticated) === 1) {
+                return true
+            } else {
+                return false
+            }
+        }
+        case 'logon': {
+            sessionStorage.setItem('isAuthenticated', 1)
+            return true
+        }
+        case 'logoff': {
+            sessionStorage.setItem('isAuthenticated', '')
+            return true
+        }
+        default: {
+            return false
+        }
+    }
+}
+
+
+// Funzione per ordinare la tabella
+const sortTable = (header) => {
+    const table = header.closest("table");
+    const columnIndex = Array.from(header.parentNode.children).indexOf(header); // Indice della colonna
+    const rows = Array.from(table.querySelectorAll("tbody tr")); // Righe del corpo della tabella
+
+    // Ottieni la direzione corrente o imposta "asc" come predefinita
+    const currentOrder = header.dataset.sortOrder || "asc";
+    const isAscending = currentOrder === "asc";
+
+    // Ordina le righe in base al contenuto della colonna
+    rows.sort((rowA, rowB) => {
+        const cellA = rowA.children[columnIndex].textContent.trim();
+        const cellB = rowB.children[columnIndex].textContent.trim();
+
+        // Determina se il contenuto è numerico
+        const isNumeric = !isNaN(cellA) && !isNaN(cellB);
+
+        if (isNumeric) {
+            // Ordina numeri
+            return isAscending
+                ? parseFloat(cellA) - parseFloat(cellB)
+                : parseFloat(cellB) - parseFloat(cellA);
+        } else {
+            // Ordina testo
+            return isAscending
+                ? cellA.toLowerCase().localeCompare(cellB.toLowerCase())
+                : cellB.toLowerCase().localeCompare(cellA.toLowerCase());
+        }
+    });
+
+    // Aggiorna l'ordine delle righe nella tabella
+    rows.forEach(row => table.querySelector("tbody").appendChild(row));
+
+    // Inverti l'ordine per il prossimo clic
+    header.dataset.sortOrder = isAscending ? "desc" : "asc";
+
+    // Resetta gli altri header
+    table.querySelectorAll("th").forEach(th => {
+        if (th !== header) {
+            delete th.dataset.sortOrder;
+        }
+    });
+}
+
+
+// Funzione che attacca l'eventListener al form di ricerca
+document.getElementById('searchDiv').addEventListener('submit', (e) => {
+    e.preventDefault()
+
+})
+
+const applySearchFilter = () => {
+
+    // Filtro l'array se c'è una ricerca generica dal form di ricerca
+    search = getUrlParam('search')
+    _D(1, `search: ${search}`)
+
+    // Filtro i record in base al parametro di ricerca
+    apiItemsArray = search
+        ? apiItemsArray.filter((item) =>
+            item._id.includes(search) ||
+            item.brand.toLowerCase().includes(search.toLowerCase()) ||
+            item.description.toLowerCase().includes(search.toLowerCase())
+        )
+        : apiItemsArray;
+    // Popolo l'input field della ricerca così che l'utente si accorga che c'è una
+    // ricerca in corso (per una miglior UX)
+    search ? document.getElementById('searchInput').value = search : {}
+}
+
+
 
 //
 // ***********************************************************************

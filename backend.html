@@ -21,7 +21,7 @@
 </head>
 
 <body>
-    <header>
+    <header class="sticky-top">
 
         <!-- NAVBAR by JS -->
 
@@ -62,8 +62,8 @@
                             <div class="modal-header">
                                 <h5 id="editModalTitle" class="modal-title" id="editModalLabel">Modal title
                                 </h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
+                                <button id="modalEditCloseButton" type="button" class="btn-close"
+                                    data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div id="editModalBody" class="modal-body">
                                 ...
@@ -78,11 +78,27 @@
             <!-- Edit Confirmation Modal -->
 
 
-            <div class="text-end">
-                <button id="editFromProductsTable" class="btn btn-danger px-4 mb-2" data-bs-toggle="modal"
-                    data-bs-target="#editModal">Add an item</button>
+            <div id="searchDiv" class="d-flex justify-content-between flex-nowrap w-100">
+                <form id="searchForm" class="d-flex flex-nowrap flex-grow-1">
+
+                    <input id="searchInput" class="form-control d-inline-block m-1 w-50" type="search"
+                        placeholder="Search" aria-label="Search">
+
+                    <button id="searchButton" class="btn btn-primary d-inline-block m-1 mb-2">Search
+                        products</button>
+
+                    <a href="/backend.html" id="cancelSearchButton"
+                        class="btn btn-warning d-inline-block m-1 mb-2 px-2">All
+                        products</a>
+
+                </form>
+
+                <button id="editFromProductsTable" class="btn btn-danger d-inline-block px-2 mb-2"
+                    data-bs-toggle="modal" data-bs-target="#editModal">Add an item</button>
+
             </div>
-            <table class="table table-hover table-striped table-responsive">
+
+            <table id="productsTable" class="table table-hover table-striped table-responsive">
                 <thead>
                     <tr class="table-primary fw-bold">
                         <td>#</td>
@@ -90,11 +106,14 @@
                         <td>Brand</td>
                         <td>Name</td>
                         <td>Description</td>
-                        <td class="text-end">Price</td>
+                        <td class="productsTablePrice">Price &euro;</td>
                         <td class="productsTableRemove text-center">
                             &nbsp;
                         </td>
                         <td class="productsTableEdit text-center">
+                            &nbsp;
+                        </td>
+                        <td>
                             &nbsp;
                         </td>
 

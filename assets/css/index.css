@@ -20,9 +20,6 @@
     font-weight: 300;
 }
 
-.jumbotron .container {
-    max-width: 50rem;
-}
 
 .card-img-top {
     height: 50vh;
@@ -41,9 +38,10 @@
     font-size: 0.7rem;
 }
 
-.chartListPrice,
+.priductsChartPrice,
 .productsTablePrice {
     text-align: right;
+    white-space: nowrap;
 }
 
 .productsTableName,
@@ -51,13 +49,20 @@
     font-size: .8rem;
 }
 
-.chartListRemove {
+#productsTable>thead td {
+    cursor: pointer;
+}
+
+.productsTableRemove,
+.productsTableEdit,
+.productsTableView {
     text-align: center;
     cursor: pointer;
 }
 
 .productsTableRemove,
-.productsTableEdit {
+.productsTableEdit,
+.productsTableView {
     width: 1rem;
 }
 

@@ -23,7 +23,7 @@ const drawAlbum = (htmReturn) => {
                     <img
                         id="image-${apiItem._id}"
                         src="${apiItem.imageUrl}"
-                        class="bd-placeholder-img card-img-top img-fluid"
+                        class="card-img-top img-fluid"
                         data-bs-toggle="modal" data-bs-target="#imageModal"
                     />
                     <div class="card-body">
@@ -48,17 +48,14 @@ const drawAlbum = (htmReturn) => {
 
                                     View
                                 </button>
-                                <!--
-                                <button id="remove-${apiItem._id}" type="button" class="btn btn-sm btn-outline-secondary">
-                                    Hide
+                                <button
+                                    id="buy-${apiItem._id}"
+                                    class="btn btn-danger ms-2 p-0 py-1 px-2">
+
+                                    Buy It! (not yet active)
                                 </button>
-                                -->
                             </div>
-                            <!--
-                            <small class="text-muted">
-                                ${apiItem.brand}
-                            </small>
-                            -->
+
                         </div>
                     </div>
                 </div>
@@ -120,7 +117,7 @@ let usersAutenticated = 0
 let search = ''
 
 
-debugLevel = 2
+debugLevel = 1
 
 //
 // ***********************************************************************
@@ -147,10 +144,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     apiItemsArray = await fetchFunction(fetchUrl, method, headersObj, bodyObject)
     _D(2, apiItemsArray, 'apiItemsArray')
 
-    search = getUrlParam('search')
-    _D(1, `search: ${search}`)
 
-    apiItemsArray = search ? apiItemsArray.filter((item) => item.brand === search) : apiItemsArray
+    // Esegue la funzione di ricerca sull'array dei dati
+    applySearchFilter()
 
     // Disegno l'album ddei prodotti
     drawAlbum()
@@ -170,13 +166,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         _D(1, `targetId is: ${targetId}`)
 
         switch (targetType) {
-            case 'remove': {
-                removeCard(targetId)
-                break
-            }
             case 'searchButton': {
-                location.href = `./pexels-start.html?q=${document.getElementById('searchInput').value}`
-                break
+                const searchValue = document.getElementById('searchInput').value;
+                location.href = `${location.origin}${location.pathname}?search=${encodeURIComponent(searchValue)}`;
+                break;
             }
             case 'image':
             case 'view': {

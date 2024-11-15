@@ -21,7 +21,7 @@
 </head>
 
 <body>
-    <header>
+    <header class="sticky-top">
 
         <!-- NAVBAR by JS -->
 
@@ -40,16 +40,19 @@
                     arrivals &dash; make
                     every shopping experience truly rewarding!
                 </p>
-                <!--
+
                 <div id="searchDiv" class="">
                     <form id="searchForm">
-                        <input id="searchInput" class="form-control d-inline m-1 w-75" type="search"
+                        <input id="searchInput" class="form-control d-inline m-1 w-50" type="search"
                             placeholder="Search" aria-label="Search">
-                        <a href="#" id="searchButton" class="btn btn-primary m-1 mb-2 d-inline-block">Search
+                        <button id="searchButton" class="btn btn-primary m-1 mb-2 d-inline-block">Search
+                            products</button>
+                        <a href="/index.html" id="cancelSearchButton"
+                            class="btn btn-warning m-1 mb-2 px-5 d-inline-block">All
                             products</a>
                     </form>
                 </div>
-                -->
+
 
                 <!-- Modal -->
                 <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel"

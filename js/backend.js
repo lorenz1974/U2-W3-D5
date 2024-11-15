@@ -5,7 +5,7 @@
 //
 
 // Disegna l'albim delle foto
-const drawProductsTable = (htmReturn) => {
+const drawProductsTable = (htmReturn = false) => {
 
     // Svuoto l'album
     !htmReturn ? document.getElementById('proctucsTableBody').innerHTML = '' : {}
@@ -29,7 +29,7 @@ const drawProductsTable = (htmReturn) => {
                         <td class="text-capitalize">${apiItem.brand}</td>
                         <td class="productsTableName">${apiItem.name}</td>
                         <td class="productsTableDescription">${apiItem.description}</td>
-                        <td class="text-end text-nowrap fw-bold">${apiItem.price.toFixed(2)} &euro;</td>
+                        <td class="text-end text-nowrap fw-bold">${apiItem.price.toFixed(2)}</td>
                         <td class="productsTableRemove text-center">
                             <i id="removeFromProductsTable-${apiItem._id}" class="fa-regular fa-trash-can"
                              data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal">
@@ -39,6 +39,13 @@ const drawProductsTable = (htmReturn) => {
                             <i id="editFromProductsTable-${apiItem._id}" class="fa-solid fa-pencil"
                              data-bs-toggle="modal" data-bs-target="#editModal">
                             </i>
+                        </td>
+                        <td class="productsTableView">
+                            <a href="/index.html?search=${apiItem._id}"
+                                class="text-dark"
+                                >
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
                         </td>
                     </tr>
                 `
@@ -131,7 +138,7 @@ const drawEditModal = async (modalId, action) => {
                     class="form-control h-100"
                     id="floatingDescription"
                     placeholder="Description"
-                    required>${itemsDetails.description}</textarea>
+                    required>${itemsDetails.description.replace(/<br\s*\/?>/g, '\r\n')}</textarea>
                 <label for="floatingDescription">Description</label>
             </div>
 
@@ -142,7 +149,7 @@ const drawEditModal = async (modalId, action) => {
 
 
             <div class="form-floating mb-3">
-                <input type="text" class="form-control" id="floatingImageUrl" placeholder="ImageUrl" value="${itemsDetails.imageUrl}" required>
+                <input type="url" class="form-control" id="floatingImageUrl" placeholder="ImageUrl" value="${itemsDetails.imageUrl}" required>
                 <label for="floatingImageUrl">Insert the product image URL</label>
             </div>
 
@@ -173,7 +180,7 @@ const manageInDatabase = async () => {
 
     const itemsDetails = {
         'name': document.getElementById('floatingName').value.trim(),
-        'description': document.getElementById('floatingDescription').value.trim(),
+        'description': document.getElementById('floatingDescription').value.trim().replace(/\r?\n/g, '<br />'),
         'brand': document.getElementById('floatingBrand').value.trim(),
         'imageUrl': document.getElementById('floatingImageUrl').value.trim(),
         'price': document.getElementById('floatingPrice').value.trim(),
@@ -210,10 +217,8 @@ let headersObj = {
     'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzM3MDYyMDhhZDEyOTAwMTU4NzZiYzEiLCJpYXQiOjE3MzE2NTkyOTcsImV4cCI6MTczMjg2ODg5N30.jEpwONMXP3MP7pYQrrV_JAv-QZWy3LHpV6EI5_vNywc'
 };
 let bodyObject = { key: 'value' };
-let apiResultArray;
-
+let apiItemsArray = []
 let usersAutenticated = 0
-
 
 debugLevel = 2
 
@@ -232,7 +237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Determino se l'utente è autenticato
     // al momento non c'è routine di autenticazione ma mi predispongo
     // se non è autenticato lo rimando in home
-    parseInt(getUrlParam('usersAutenticated')) !== 1 && debugLevel < 2 ? window.location.assign('/index.html') : {}
+    !userAutentication('check') && debugLevel < 2 ? window.location.assign('/index.html') : {}
 
 
     // Disegno header e footer
@@ -241,6 +246,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Eseguo il fetch
     apiItemsArray = await fetchFunction(fetchUrl, method, headersObj, bodyObject)
     _D(2, apiItemsArray, 'apiItemsArray')
+
+    // Esegue la funzione di ricerca sull'array dei dati
+    applySearchFilter()
 
     // Disegno la tabella dei prodotti
     drawProductsTable()
@@ -283,22 +291,49 @@ document.addEventListener('DOMContentLoaded', async () => {
                 break
             }
 
+            case 'searchButton': {
+                const searchValue = document.getElementById('searchInput').value;
+                location.href = `${location.origin}${location.pathname}?search=${encodeURIComponent(searchValue)}`;
+                break;
+            }
+
             default: { break }
         }
     })
 
+    // Attacca l'evento al modale della modifica
+    // E' disattivata la chiusura automatica del modale perché altrimenti il form non poteva
+    // correttamente effettuare la validazione dei campi.
+    // Viene chiuso simulando la pressione sulla 'X' in alto a destra
     document.getElementById('editModalForm').addEventListener('submit', async (e) => {
         // Disattivo il comportamento standard del form
         e.preventDefault()
 
         _D(1, `updateForm seubmitted`)
 
+        // Forzo la chiusura del modale
+        document.getElementById('modalEditCloseButton').click()
+
         // Aggiorno il target dal DB
         apiItemsArray = await manageInDatabase()
+        _D(2, apiItemsArray, 'apiItemsArray')
 
-        //Ricarico tutta la pagina
-        window.location.reload()
+
+        //Ricarico l'array dei prodotti
+        apiItemsArray = await fetchFunction(fetchUrl, method, headersObj, bodyObject)
+
+        // Ridisegno la tabella
+        drawProductsTable()
     })
 
+    // Attacca l'evento al click sull'intestazione della colonna della tabella prodotti
+    // Viene richiamata poi la funzione 'sortTable' che sta dentro 'functions.js'
+    document.querySelector('#productsTable thead').addEventListener('click', (e) => {
+        _D(1, `requested table sorting: ${e.target.tagName} - ${e.target.innerText}`)
+
+        if (e.target.tagName === 'TD') {
+            sortTable(e.target);
+        }
+    });
 
 })
