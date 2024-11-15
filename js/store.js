@@ -93,7 +93,11 @@ const drawModal = async (modalId) => {
         </div>
     `;
 
-    //document.getElementById('imageModal').style.backgroundColor = photoArray.avg_color
+    // Creo il footer del modale
+    // se l'utente è autenticato mette anche il bottone per editare la scheda che rimanda al backend
+    let imageModalFooterHTML = userAutentication('check') ? `<a href="/backend.html?editId=${itemsDetails._id}" class="btn btn-warning px-4">Edit</a>` : ''
+    imageModalFooterHTML += '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>'
+    document.getElementById('imageModalFooter').innerHTML = imageModalFooterHTML
 };
 
 //
@@ -117,7 +121,7 @@ let usersAutenticated = 0
 let search = ''
 
 
-debugLevel = 1
+debugLevel = 2
 
 //
 // ***********************************************************************
@@ -140,17 +144,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Disegno header e footer
     drawHeaderAndFooter()
 
-    // Eseguo il fetch
-    apiItemsArray = await fetchFunction(fetchUrl, method, headersObj, bodyObject)
-    _D(2, apiItemsArray, 'apiItemsArray')
 
+    // Esegue la fetch e la ricerca sull'array dei dati
+    await applySearchFilter()
 
-    // Esegue la funzione di ricerca sull'array dei dati
-    applySearchFilter()
 
     // Disegno l'album ddei prodotti
     drawAlbum()
-
 
 
     // Event listener al click sul body

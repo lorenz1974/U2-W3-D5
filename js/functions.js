@@ -191,23 +191,44 @@ const sortTable = (header) => {
 // Funzione che attacca l'eventListener al form di ricerca
 document.getElementById('searchDiv').addEventListener('submit', (e) => {
     e.preventDefault()
-
 })
 
-const applySearchFilter = () => {
+
+const applySearchFilter = async () => {
 
     // Filtro l'array se c'è una ricerca generica dal form di ricerca
     search = getUrlParam('search')
     _D(1, `search: ${search}`)
 
+    // Eseguo il fetch
+    apiItemsArray = await fetchFunction(fetchUrl, method, headersObj, bodyObject)
+    _D(2, apiItemsArray, 'apiItemsArray')
+
     // Filtro i record in base al parametro di ricerca
-    apiItemsArray = search
-        ? apiItemsArray.filter((item) =>
-            item._id.includes(search) ||
-            item.brand.toLowerCase().includes(search.toLowerCase()) ||
-            item.description.toLowerCase().includes(search.toLowerCase())
-        )
-        : apiItemsArray;
+    // La ricesca estesa permette di ricercare anche gli 'users'
+    if (getUrlParam('extensiveSearch') !== '1') {
+        apiItemsArray = search
+            ? apiItemsArray.filter((item) =>
+                (item._id.includes(search) ||
+                    item.brand.toLowerCase().includes(search.toLowerCase()) ||
+                    item.description.toLowerCase().includes(search.toLowerCase())
+                ) && !item.brand.toLowerCase().includes('user')
+            )
+            : apiItemsArray.filter((item) =>
+                !item.brand.toLowerCase().includes('user')
+            )
+    } else {
+        apiItemsArray = search
+            ? apiItemsArray.filter(
+                (item) =>
+                    item._id.includes(search) ||
+                    item.brand.toLowerCase().includes(search.toLowerCase()) ||
+                    item.description.toLowerCase().includes(search.toLowerCase())
+            )
+            : apiItemsArray;
+
+    }
+
     // Popolo l'input field della ricerca così che l'utente si accorga che c'è una
     // ricerca in corso (per una miglior UX)
     search ? document.getElementById('searchInput').value = search : {}

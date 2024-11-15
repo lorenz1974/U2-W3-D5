@@ -243,12 +243,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Disegno header e footer
     drawHeaderAndFooter()
 
-    // Eseguo il fetch
-    apiItemsArray = await fetchFunction(fetchUrl, method, headersObj, bodyObject)
-    _D(2, apiItemsArray, 'apiItemsArray')
 
-    // Esegue la funzione di ricerca sull'array dei dati
-    applySearchFilter()
+    // Esegue la fetch e la ricerca sull'array dei dati
+    await applySearchFilter()
+
 
     // Disegno la tabella dei prodotti
     drawProductsTable()
@@ -300,6 +298,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             default: { break }
         }
     })
+
+
+    // Verifica se è richiesto lediting di qualche scheda e nel caso la apre
+    // simulando un click sull'icona dell'edit
+    // NOTA: Deve essere messo dopo l'eventListener del body altrimenti non può funzionare
+    const editId = getUrlParam('editId')
+    _D(2, `editId: ${editId}`)
+    editId ? document.getElementById('editFromProductsTable-' + editId).click() : {}
+
 
     // Attacca l'evento al modale della modifica
     // E' disattivata la chiusura automatica del modale perché altrimenti il form non poteva
