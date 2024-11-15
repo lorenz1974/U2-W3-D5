@@ -1,0 +1,70 @@
+.jumbotron {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    margin-bottom: 0;
+    background-color: #fff;
+}
+
+@media (min-width: 768px) {
+    .jumbotron {
+        padding-top: 6rem;
+        padding-bottom: 6rem;
+    }
+}
+
+.jumbotron p:last-child {
+    margin-bottom: 0;
+}
+
+.jumbotron-heading {
+    font-weight: 300;
+}
+
+.jumbotron .container {
+    max-width: 50rem;
+}
+
+.card-img-top {
+    height: 50vh;
+    object-fit: contain;
+}
+
+.card:hover {
+    scale: 1.01;
+}
+
+.modal-dialog {
+    max-width: 50%;
+}
+
+.chartListTitle {
+    font-size: 0.7rem;
+}
+
+.chartListPrice,
+.productsTablePrice {
+    text-align: right;
+}
+
+.productsTableName,
+.productsTableDescription {
+    font-size: .8rem;
+}
+
+.chartListRemove {
+    text-align: center;
+    cursor: pointer;
+}
+
+.productsTableRemove,
+.productsTableEdit {
+    width: 1rem;
+}
+
+.chartTotal td {
+    padding-top: .5rem;
+}
+
+.card-text a:hover {
+    color: #303030 !important;
+}
