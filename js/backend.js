@@ -8,7 +8,11 @@
 const drawProductsTable = (htmReturn = false) => {
 
     // Svuoto l'album
-    !htmReturn ? document.getElementById('proctucsTableBody').innerHTML = '' : {}
+    if (!htmReturn) {
+        document.getElementById('proctucsTableBody').innerHTML = ''
+        // Attivo il placeholder
+        document.getElementById('waitPlaceholder').classList.remove('d-none')
+    }
 
     // Eseguo il loop sullì'array delel card
     apiItemsArray.forEach((apiItem, index) => {
@@ -52,6 +56,10 @@ const drawProductsTable = (htmReturn = false) => {
 
         _D(3, `tableBodyHTML: ${tableBodyHTML}`)
 
+        // Disattivo il placeholder...
+        document.getElementById('waitPlaceholder').classList.add('d-none')
+
+        // Sparo la tabella
         document.getElementById('proctucsTableBody').innerHTML += tableBodyHTML
     })
 }
@@ -248,8 +256,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     await applySearchFilter()
 
 
-    // Disegno la tabella dei prodotti
-    drawProductsTable()
+    // Manda un alert all'utente se non ci sono prodotti altrimenti disegno la tabella dei prodotti
+    if (apiItemsArray.length === 0) {
+        sendAnAlert('No products found', 'warning')
+
+        // Disattivo la tabella
+        document.getElementById('productsTable').classList.add('d-none')
+
+        // Disattivo il placeholder
+        document.getElementById('waitPlaceholder').classList.add('d-none')
+
+    } else {
+        // Disattivo il placeholder
+        drawProductsTable()
+    }
+
+
 
     // Event listener al click sul body
     document.getElementsByTagName('body')[0].addEventListener('click', async (e) => {

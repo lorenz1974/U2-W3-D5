@@ -148,9 +148,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Esegue la fetch e la ricerca sull'array dei dati
     await applySearchFilter()
 
-
-    // Disegno l'album ddei prodotti
-    drawAlbum()
+    // Manda un alert all'utente se non ci sono prodotti altrimenti disegno l'album
+    apiItemsArray.length === 0 ? sendAnAlert('No products found', 'warning') : drawAlbum()
 
 
     // Event listener al click sul body

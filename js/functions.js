@@ -235,6 +235,12 @@ const applySearchFilter = async () => {
 }
 
 
+// Funzione che manda messaggi all'utente
+const sendAnAlert = (message, level) => {
+    document.getElementById('alertMessage').innerHTML = message
+    document.getElementById('alertMessage').classList.add(`alert-${level}`)
+    document.getElementById('alertMessage').classList.toggle('d-none')
+}
 
 //
 // ***********************************************************************

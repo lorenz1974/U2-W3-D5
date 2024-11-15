@@ -101,6 +101,12 @@
 
             </div>
 
+            <!-- Alert -->
+            <div id="alertMessage" class="alert d-none mt-5 mb-5" role="alert">
+                ...
+            </div>
+            <!-- Alert -->
+
             <table id="productsTable" class="table table-hover table-striped table-responsive">
                 <thead>
                     <tr class="table-primary fw-bold">
@@ -124,18 +130,19 @@
                 </thead>
                 <tbody id="proctucsTableBody">
                     <!-- TBODY by JS -->
-                    <tr>
-                        <td colspan="9" class="h-100">
-                            <div class="d-flex justify-content-center align-content-center spinner-border text-warning"
-                                role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                        </td>
-                    </tr>
 
                 </tbody>
                 <tfoot></tfoot>
             </table>
+
+            <!-- spinner -->
+            <div id="waitPlaceholder" class="d-flex flex-column" role="status">
+                <span class="placeholder w-50 mb-3"></span>
+                <span class="placeholder w-75 mb-3"></span>
+                <span class="placeholder w-25 mb-3"></span>
+            </div>
+            <!-- spinner -->
+
         </div>
 
     </main>
