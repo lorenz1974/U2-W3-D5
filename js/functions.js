@@ -210,6 +210,7 @@ const applySearchFilter = async () => {
         apiItemsArray = search
             ? apiItemsArray.filter((item) =>
                 (item._id.includes(search) ||
+                    item.name.toLowerCase().includes(search.toLowerCase()) ||
                     item.brand.toLowerCase().includes(search.toLowerCase()) ||
                     item.description.toLowerCase().includes(search.toLowerCase())
                 ) && !item.brand.toLowerCase().includes('user')
@@ -222,6 +223,7 @@ const applySearchFilter = async () => {
             ? apiItemsArray.filter(
                 (item) =>
                     item._id.includes(search) ||
+                    item.name.toLowerCase().includes(search.toLowerCase()) ||
                     item.brand.toLowerCase().includes(search.toLowerCase()) ||
                     item.description.toLowerCase().includes(search.toLowerCase())
             )
