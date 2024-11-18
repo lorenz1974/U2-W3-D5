@@ -77,7 +77,7 @@ const drawConfirmationModal = (modalId) => {
     }
 
     // Disattivo il placeholder
-    switchOffPlaceholders();
+    //switchOffPlaceholders();
 
 
     // Setta il titolo del modale
@@ -150,7 +150,7 @@ const drawEditModal = async (modalId) => {
     }
 
     // Disattivo il placeholder
-    switchOffPlaceholders();
+    //switchOffPlaceholders();
 
     // Disegna il modale (con i dati recuperati o con l'oggetto fittizio)
     document.getElementById('editModalTitle').innerHTML = `CREATE/MODIFY A PRODUCT`;

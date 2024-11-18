@@ -66,7 +66,6 @@
             <form id="editModalForm">
                 <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel"
                     aria-hidden="true">
-
                     <div class="modal-dialog">
                         <div id="editModalContent" class="modal-content">
                             <div class="modal-header">
@@ -76,32 +75,23 @@
                                 <button id="modalEditCloseButton" type="button" class="btn-close"
                                     data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
+                            <div id="editModalBody" class="modal-body">
 
-                            <div class="row">
-                                <div id="modalImage" class="col d-flex justify-content-center align-items-start mt-6">
-                                    <img width="300px" src="./assets/imgs/imgPlaceholder.jpg" alt="Placeholder">
+                                <!-- Waiting placeholder -->
+                                <div class="waitPlaceholder d-flex flex-column" role="status">
+                                    <span class="placeholder w-50 mb-3"></span>
+                                    <span class="placeholder w-75 mb-3"></span>
+                                    <span class="placeholder w-25 mb-3"></span>
                                 </div>
-                                <div class="col">
-                                    <div id="editModalBody" class="modal-body">
+                                <!-- Waiting placeholder -->
 
-                                        <!-- Waiting placeholder -->
-                                        <div class="waitPlaceholder d-flex flex-column" role="status">
-                                            <span class="placeholder w-50 mb-3"></span>
-                                            <span class="placeholder w-75 mb-3"></span>
-                                            <span class="placeholder w-25 mb-3"></span>
-                                        </div>
-                                        <!-- Waiting placeholder -->
-
-                                    </div>
-                                </div>
-
-
-                                <div id="editModalFooter" class="modal-footer">
-                                    <!-- ... -->
-                                </div>
+                            </div>
+                            <div id="editModalFooter" class="modal-footer">
+                                <!-- ... -->
                             </div>
                         </div>
                     </div>
+                </div>
             </form>
             <!-- Edit Confirmation Modal -->
 

@@ -270,7 +270,7 @@ const switchOffPlaceholders = () => {
 // ***********************************************************************
 //
 
-debugLevel = 2
+debugLevel = 3
 
 
 //
