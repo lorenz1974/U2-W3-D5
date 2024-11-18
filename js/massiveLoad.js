@@ -25,6 +25,7 @@ let bodyObject = { key: 'value' };
 // Contenitore dei risultati del fecth
 let apiResultArray;
 
+const debugLevel = 2;
 
 
 
@@ -37,26 +38,26 @@ let apiResultArray;
 //
 
 // Cancella tutto
-// (async () => {
-//     try {
-//         const fetchUrl = 'https://striveschool-api.herokuapp.com/api/product/';
-//         // Chiamata API per ottenere l'array
-//         const apiResultArray = await fetchFunction(fetchUrl, 'GET', headersObj);
+(async () => {
+    try {
+        const fetchUrl = 'https://striveschool-api.herokuapp.com/api/product/';
+        // Chiamata API per ottenere l'array
+        const apiResultArray = await fetchFunction(fetchUrl, 'GET', headersObj);
 
-//         _D(3, 'apiResultArray', apiResultArray);
+        _D(1, apiResultArray, 'apiResultArray');
 
-//         // Esegui un'operazione su ogni elemento dell'array
-//         for (i = 0; i < apiResultArray.length; i++) {
-//             const postFetchUrl = 'https://striveschool-api.herokuapp.com/api/product/' + apiResultArray[i]._id;
+        // Esegui un'operazione su ogni elemento dell'array
+        // for (i = 0; i < apiResultArray.length; i++) {
+        //     const postFetchUrl = 'https://striveschool-api.herokuapp.com/api/product/' + apiResultArray[i]._id;
 
-//             // Invio dei dati di ogni elemento a un'altra API
-//             const response = await fetchFunction(postFetchUrl, 'DELETE', headersObj);
-//             _D(3, `Dati inviati per l'item ${apiResultArray[i]._id}`, response);
-//         }
-//     } catch (error) {
-//         console.error('Errore durante la chiamata API:', error);
-//     }
-// })();
+        //     // Invio dei dati di ogni elemento a un'altra API
+        //     const response = await fetchFunction(postFetchUrl, 'DELETE', headersObj);
+        //     _D(3, `Dati inviati per l'item ${apiResultArray[i]._id}`, response);
+        // }
+    } catch (error) {
+        console.error('Errore durante la chiamata API:', error);
+    }
+})();
 
 
 // (async () => {

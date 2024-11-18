@@ -10,8 +10,6 @@ const drawProductsTable = (htmReturn = false) => {
     // Svuoto l'album
     if (!htmReturn) {
         document.getElementById('proctucsTableBody').innerHTML = ''
-        // Attivo il placeholder
-        document.getElementById('waitPlaceholder').classList.remove('d-none')
     }
 
     // Eseguo il loop sullì'array delel card
@@ -56,8 +54,8 @@ const drawProductsTable = (htmReturn = false) => {
 
         _D(3, `tableBodyHTML: ${tableBodyHTML}`)
 
-        // Disattivo il placeholder...
-        document.getElementById('waitPlaceholder').classList.add('d-none')
+        // Disattivo il placeholder
+        switchOffPlaceholders();
 
         // Sparo la tabella
         document.getElementById('proctucsTableBody').innerHTML += tableBodyHTML
@@ -66,121 +64,146 @@ const drawProductsTable = (htmReturn = false) => {
 
 
 // Disegno il modale per la conferma della cancellazione
-const drawConfirmationModal = async (modalId, action) => {
+const drawConfirmationModal = (modalId) => {
+    try {
+        // Recupera i dettagli dell'elemento tramite fetch
+        const itemsDetails = fetchFunction(`${fetchUrl}/${modalId}`, 'GET', headersObj);
+        _D(2, itemsDetails, 'itemsDetails');
 
-    const itemsDetails = await fetchFunction(fetchUrl + '/' + modalId, 'GET', headersObj)
-    _D(3, itemsDetails, 'itemsDetails')
+    } catch (error) {
+        // Gestione errori
+        sendAnAlert(`drawConfirmationModal - Errore nel caricamento del modale: ${error.message}`, 'danger');
+        throw new Error('Errore nel caricamento del modale')
+    }
 
-    // Setto il titolo
-    document.getElementById('deleteModalTitle').innerHTML = `CONFIRM DELETE ACTION`
+    // Disattivo il placeholder
+    switchOffPlaceholders();
 
 
-    // Setto il body del modale
-    document.getElementById('deleteModalBody').innerHTML = `
-        <h3 class="text-center text-danger">THIS PRODUCT IS GOING TO BE DELETED</h1>
-        <p class="m-0 mt-3 p-0"><span class="fw-bold">Name:</span> <span class="">${itemsDetails.name} </span></p>
-        <p class="m-0 mt-3 p-0"><span class="fw-bold">Description:</span></p>
-        <p><span class=""> ${itemsDetails.description}</span></p>
-        <p class="m-0 p-0"><span class="fw-bold">Category:</span> <span class="">${itemsDetails.brand} </span></p>
-            <p class="mt-3 p-0"><span class="fw-bold">Price:</span> <span class="fw-bold">${itemsDetails.price.toFixed(2)} &euro;</span></p>
-        </div>
-    `
-    document.getElementById('deleteModalFooter').innerHTML = `
-        <button id="deleteFromDatabase-${itemsDetails._id}" type="button" class="btn btn-danger" data-bs-dismiss="modal">DELETE</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CANCEL</button>
-    `
+    // Setta il titolo del modale
+    const modalTitle = document.getElementById('deleteModalTitle');
+    if (modalTitle) {
+        modalTitle.innerHTML = `CONFIRM DELETE ACTION`;
+    }
 
-    //document.getElementById('imageModal').style.backgroundColor = photoArray.avg_color
-};
+    // Setta il body del modale
+    const modalBody = document.getElementById('deleteModalBody');
+    if (modalBody) {
+        modalBody.innerHTML = `
+                <h3 class="text-center text-danger">THIS PRODUCT IS GOING TO BE DELETED</h3>
+                <p class="m-0 mt-3 p-0"><span class="fw-bold">Name:</span> ${itemsDetails.name}</p>
+                <p class="m-0 mt-3 p-0"><span class="fw-bold">Description:</span></p>
+                <p>${itemsDetails.description}</p>
+                <p class="m-0 p-0"><span class="fw-bold">Category:</span> ${itemsDetails.brand}</p>
+                <p class="mt-3 p-0"><span class="fw-bold">Price:</span> <span class="fw-bold">${itemsDetails.price.toFixed(2)} &euro;</span></p>
+            `;
+    }
+
+    // Setta il footer del modale
+    const modalFooter = document.getElementById('deleteModalFooter');
+    if (modalFooter) {
+        modalFooter.innerHTML = `
+                <button id="deleteFromDatabase-${itemsDetails._id}" type="button" class="btn btn-danger" data-bs-dismiss="modal">DELETE</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CANCEL</button>
+            `;
+    }
+}
+
 
 
 // Funzione che cancella il prodotto dal DB
 const deleteFromDatabase = async (productId) => {
     _D(1, `Cancellazione del prodotto: ${productId}`)
-    const apiResponse = await fetchFunction(fetchUrl + productId, 'DELETE', headersObj)
-    _D(2, apiResponse, 'apiResponse')
+    try {
+        const apiResponse = await fetchFunction(fetchUrl + productId, 'DELETE', headersObj)
+        _D(2, apiResponse, 'apiResponse')
+    } catch (error) {
+        // Gestione errori
+        sendAnAlert(`deleteFromDatabase - Errore nella cancellazione del prodotto: ${error.message}`, 'danger');
+        throw new Error('Errore nella cancellazione del prodotto')
+    }
+
 }
 
 
 
 // Disegno il modale per l'edit o l'inserimento
-const drawEditModal = async (modalId, action) => {
+const drawEditModal = async (modalId) => {
+    let itemsDetails = {
+        '_id': '',
+        'name': '',
+        'description': '',
+        'brand': '',
+        'imageUrl': '',
+        'price': 0
+    };
 
-    // In caso di Edit viene passato un modalId preso dalla tabella prodotti
-    // In caso di creazione no e quindi genero un oggetto fittizio per non dover cambiare il codice
-    let itemsDetails = {}
+    // Se viene passato un modalId, tenta di recuperare i dati
     if (modalId) {
-        itemsDetails = await fetchFunction(fetchUrl + '/' + modalId, 'GET', headersObj)
-        _D(3, itemsDetails, 'itemsDetails')
-    } else {
-        itemsDetails = {
-            '_id': '',
-            'name': '',
-            'description': '',
-            'brand': '',
-            'imageUrl': '',
-            'price': 0
+        try {
+            itemsDetails = await fetchFunction(`${fetchUrl}/${modalId}`, 'GET', headersObj);
+            _D(3, itemsDetails, 'drawEditModal - itemsDetails');
+        } catch (error) {
+            sendAnAlert(`drawEditModal - Errore nel recupero dei dati: ${error.message}`, 'danger');
+            throw new Error('Errore durante il recupero dei dati per il modale'); // Segnala chiaramente l'errore
         }
     }
 
-    document.getElementById('editModalTitle').innerHTML = `CREATE/MODIFY A PRODUCT`
+    // Disattivo il placeholder
+    switchOffPlaceholders();
 
-    // Setto il body del modale
+    // Disegna il modale (con i dati recuperati o con l'oggetto fittizio)
+    document.getElementById('editModalTitle').innerHTML = `CREATE/MODIFY A PRODUCT`;
+
     document.getElementById('editModalBody').innerHTML = `
-            <div class="form-floating mb-3">
-                <input type="text" class="form-control" id="floatingId" placeholder="name" value="${itemsDetails._id}" disabled>
-                <label for="floatingId">Product ID</label>
-            </div>
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="floatingId" placeholder="name" value="${itemsDetails._id}" disabled>
+            <label for="floatingId">Product ID</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="floatingName" placeholder="name" value="${itemsDetails.name}" required>
+            <label for="floatingName">Product name</label>
+            <div class="invalid-feedback">Please insert the product name.</div>
+        </div>
+        <div class="form-floating mb-3">
+            <textarea
+                rows="10"
+                class="form-control h-100"
+                id="floatingDescription"
+                placeholder="Description"
+                required>${itemsDetails.description.replace(/<br\s*\/?>/g, '\r\n')}</textarea>
+            <label for="floatingDescription">Description</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="floatingBrand" placeholder="Brand" value="${itemsDetails.brand}" required>
+            <label for="floatingBrand">Brand</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="url" class="form-control" id="floatingImageUrl" placeholder="ImageUrl" value="${itemsDetails.imageUrl}" required>
+            <label for="floatingImageUrl">Insert the product image URL</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="number" min="0" step="0.01"
+                class="form-control"
+                id="floatingPrice"
+                placeholder="Price"
+                value="${itemsDetails.price}"
+                required
+            >
+            <label for="floatingPrice">Price in Euro &euro;</label>
+        </div>
+    `;
 
-            <div class="form-floating mb-3">
-                <input type="text" class="form-control" id="floatingName" placeholder="name" value="${itemsDetails.name}" required>
-                <label for="floatingName">Product name</label>
-                    <div class="invalid-feedback">
-                        Please insert the product name.
-                    </div>
-            </div>
-
-            <div class="form-floating mb-3">
-                <textarea
-                    rows="10"
-                    class="form-control h-100"
-                    id="floatingDescription"
-                    placeholder="Description"
-                    required>${itemsDetails.description.replace(/<br\s*\/?>/g, '\r\n')}</textarea>
-                <label for="floatingDescription">Description</label>
-            </div>
-
-            <div class="form-floating mb-3">
-                <input type="text" class="form-control" id="floatingBrand" placeholder="Brand" value="${itemsDetails.brand}" required>
-                <label for="floatingBrand">Brand</label>
-            </div>
-
-
-            <div class="form-floating mb-3">
-                <input type="url" class="form-control" id="floatingImageUrl" placeholder="ImageUrl" value="${itemsDetails.imageUrl}" required>
-                <label for="floatingImageUrl">Insert the product image URL</label>
-            </div>
-
-            <div class="form-floating mb-3">
-                <input type="number" min="0" step="0.01"
-                    class="form-control"
-                    id="floatingPrice"
-                    placeholder="Price"
-                    value="${itemsDetails.price}"
-                    required
-                >
-                <label for="floatingPrice">Price in Euro &euro;</label>
-            </div>
-    `
     document.getElementById('editModalFooter').innerHTML = `
         <button type="submit" data-mdb-button-init data-mdb-ripple-init
             id="${modalId ? 'updateInDatabase' : 'createInDatabase'}-${itemsDetails._id}"
             class="btn btn-danger">
-             ${modalId ? 'UPDATE' : 'CREATE'}
+            ${modalId ? 'UPDATE' : 'CREATE'}
         </button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CANCEL</button>
-    `
+    `;
 };
+
 
 const manageInDatabase = async () => {
 
@@ -194,17 +217,36 @@ const manageInDatabase = async () => {
         'price': document.getElementById('floatingPrice').value.trim(),
     }
 
+    // Se non c'è il productId vuol dire che il modale è stato popolato per la creazione e non la modifica
     if (productId !== '') {
+
         _D(1, `Aggiornamento del prodotto: ${productId}`)
         _D(2, itemsDetails)
-        const apiResponse = await fetchFunction(fetchUrl + productId, 'PUT', headersObj, itemsDetails)
-        _D(2, apiResponse, 'apiResponse')
+
+        try {
+            const apiResponse = fetchFunction(fetchUrl + productId, 'PUT', headersObj, itemsDetails)
+            _D(2, apiResponse, 'apiResponse')
+
+        } catch (error) {
+            // Gestione errori
+            sendAnAlert(`manageInDatabase - Errore nella aggiornamento del prodotto: ${error.message}`, 'danger');
+            throw new Error('Errore nella aggiornamento del prodotto')
+        }
     }
     else {
+
         _D(1, `Inserimento del prodotto: ${itemsDetails.name}`)
         _D(2, itemsDetails)
-        const apiResponse = await fetchFunction(fetchUrl, 'POST', headersObj, itemsDetails)
-        _D(2, apiResponse, 'apiResponse')
+
+        try {
+            const apiResponse = fetchFunction(fetchUrl, 'POST', headersObj, itemsDetails)
+            _D(2, apiResponse, 'apiResponse')
+
+        } catch (error) {
+            // Gestione errori
+            sendAnAlert(`manageInDatabase - Errore nella creazione del prodotto: ${error.message}`, 'danger');
+            throw new Error('Errore nella creazione del prodotto')
+        }
     }
 
 }
@@ -228,7 +270,7 @@ let bodyObject = { key: 'value' };
 let apiItemsArray = []
 let usersAutenticated = 0
 
-debugLevel = 2
+// debugLevel = 3 // Definito in function.js
 
 //
 // ***********************************************************************
@@ -239,76 +281,92 @@ debugLevel = 2
 //
 
 document.addEventListener('DOMContentLoaded', async () => {
-
-    _D(1, 'DOM Loaded')
+    _D(1, 'DOM Loaded');
 
     // Determino se l'utente è autenticato
-    // al momento non c'è routine di autenticazione ma mi predispongo
-    // se non è autenticato lo rimando in home
-    !userAutentication('check') && debugLevel < 2 ? window.location.assign('/index.html') : {}
-
+    if (!userAutentication('check') && debugLevel < 2) {
+        window.location.assign('/index.html');
+        return;
+    }
 
     // Disegno header e footer
-    drawHeaderAndFooter()
+    drawHeaderAndFooter();
 
 
-    // Esegue la fetch e la ricerca sull'array dei dati
-    await applySearchFilter()
-
-
-    // Manda un alert all'utente se non ci sono prodotti altrimenti disegno la tabella dei prodotti
-    if (apiItemsArray.length === 0) {
-        sendAnAlert('No products found', 'warning')
-
-        // Disattivo la tabella
-        document.getElementById('productsTable').classList.add('d-none')
-
-        // Disattivo il placeholder
-        document.getElementById('waitPlaceholder').classList.add('d-none')
-
-    } else {
-        // Disattivo il placeholder
-        drawProductsTable()
+    // Verifica se è richiesto l'editing di qualche scheda e nel caso la apre simulando un click sull'icona dell'edit
+    const editId = getUrlParam('editId');
+    _D(2, `editId: ${editId}`);
+    if (editId) {
+        drawEditModal(editId)
+        //editModalForm
+        const modal = new bootstrap.Modal(document.getElementById('editModal'), {})
+        modal.show();
+        _D(2, 'body.addEventListener - modal.show()', modal)
     }
 
 
+    // Esegue la fetch e applica la ricerca sull'array dei dati
+    try {
+        await applySearchFilter();
+        _D(3, apiItemsArray, 'body.addEventListener - apiItemsArray');
+    } catch (error) {
+        sendAnAlert(`DOMContentLoaded - Errore durante il caricamento iniziale: ${error.message}`, 'danger');
+        throw new Error('Errore durante il caricamento iniziale');
+    }
+
+    // Disattivo il placeholder
+    switchOffPlaceholders();
+
+    // Verifica e gestisce i prodotti
+    if (apiItemsArray.length === 0) {
+        sendAnAlert('No products found', 'warning');
+        // Disattivo la tabella
+        document.getElementById('productsTable').classList.add('d-none');
+    } else {
+        // Disegno la tabella prodotti
+        drawProductsTable();
+    }
 
     // Event listener al click sul body
     document.getElementsByTagName('body')[0].addEventListener('click', async (e) => {
+        const target = e.target.id;
+        _D(3, `event is:`, e);
 
-        const target = e.target.id
-        _D(3, `event is:`, e)
+        const targetType = target.split('-')[0];
+        _D(1, `targetType is: ${targetType}`);
 
-        const targetType = target.split('-')[0]
-        _D(1, `targetType is: ${targetType}`)
-
-        const targetId = target.split('-')[1]
-        _D(1, `targetId is: ${targetId}`)
+        const targetId = target.split('-')[1];
+        _D(1, `targetId is: ${targetId}`);
 
         switch (targetType) {
             case 'removeFromProductsTable': {
-                drawConfirmationModal(targetId, 'removeFromProductsTable')
-                break
+                drawConfirmationModal(targetId, 'removeFromProductsTable');
+                break;
             }
 
             case 'editFromProductsTable': {
-                _W('editFromProductsTable')
-                drawEditModal(targetId, 'editFromProductsTable')
-
-                break
-
+                _W('editFromProductsTable');
+                drawEditModal(targetId, 'editFromProductsTable');
+                break;
             }
+
             case 'deleteFromDatabase': {
-                // Cancello il target dal DB
-                deleteFromDatabase(targetId)
+                try {
+                    // Cancello il target dal DB
+                    await deleteFromDatabase(targetId);
+                } catch (error) {
+                    sendAnAlert(`Errore durante la cancellazione del prodotto: ${error.message}`, 'danger');
+                    throw new Error('Errore durante la cancellazione del prodotto')
+                }
 
-                //Ricarico gli items dal catalogo
-                apiItemsArray = await fetchFunction(fetchUrl, method, headersObj, bodyObject)
+                // Ricarico gli items dal catalogo
+                apiItemsArray = await fetchFunction(fetchUrl, method, headersObj, bodyObject);
 
-                //Ridisegno la tabella prodotti
-                drawProductsTable()
+                // Ridisegno la tabella prodotti
+                drawProductsTable();
 
-                break
+
+                break;
             }
 
             case 'searchButton': {
@@ -317,52 +375,41 @@ document.addEventListener('DOMContentLoaded', async () => {
                 break;
             }
 
-            default: { break }
+            default:
+                break;
         }
-    })
-
-
-    // Verifica se è richiesto lediting di qualche scheda e nel caso la apre
-    // simulando un click sull'icona dell'edit
-    // NOTA: Deve essere messo dopo l'eventListener del body altrimenti non può funzionare
-    const editId = getUrlParam('editId')
-    _D(2, `editId: ${editId}`)
-    editId ? document.getElementById('editFromProductsTable-' + editId).click() : {}
+    });
 
 
     // Attacca l'evento al modale della modifica
-    // E' disattivata la chiusura automatica del modale perché altrimenti il form non poteva
-    // correttamente effettuare la validazione dei campi.
-    // Viene chiuso simulando la pressione sulla 'X' in alto a destra
     document.getElementById('editModalForm').addEventListener('submit', async (e) => {
-        // Disattivo il comportamento standard del form
-        e.preventDefault()
+        e.preventDefault();
 
-        _D(1, `updateForm seubmitted`)
+        _D(1, `updateForm submitted`);
 
-        // Forzo la chiusura del modale
-        document.getElementById('modalEditCloseButton').click()
+        try {
+            // Forzo la chiusura del modale
+            document.getElementById('modalEditCloseButton').click();
 
-        // Aggiorno il target dal DB
-        apiItemsArray = await manageInDatabase()
-        _D(2, apiItemsArray, 'apiItemsArray')
+            // Aggiorno il target nel DB
+            await manageInDatabase();
 
+            // Ricarico l'array dei prodotti
+            apiItemsArray = await fetchFunction(fetchUrl, method, headersObj, bodyObject);
 
-        //Ricarico l'array dei prodotti
-        apiItemsArray = await fetchFunction(fetchUrl, method, headersObj, bodyObject)
-
-        // Ridisegno la tabella
-        drawProductsTable()
-    })
+            // Ridisegno la tabella
+            drawProductsTable();
+        } catch (error) {
+            sendAnAlert(`Errore durante l'aggiornamento dei dati: ${error.message}`, 'danger');
+        }
+    });
 
     // Attacca l'evento al click sull'intestazione della colonna della tabella prodotti
-    // Viene richiamata poi la funzione 'sortTable' che sta dentro 'functions.js'
     document.querySelector('#productsTable thead').addEventListener('click', (e) => {
-        _D(1, `requested table sorting: ${e.target.tagName} - ${e.target.innerText}`)
+        _D(1, `requested table sorting: ${e.target.tagName} - ${e.target.innerText}`);
 
         if (e.target.tagName === 'TD') {
             sortTable(e.target);
         }
     });
-
-})
+});

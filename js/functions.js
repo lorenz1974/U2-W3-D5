@@ -6,46 +6,55 @@
 
 // esegue il fect delle API
 const fetchFunction = async (fetchUrl, method, headersObj, bodyObject) => {
+    try {
+        // Debug...
+        _D(1, `fetching: ${fetchUrl}`);
 
-    // Debug...
-    _D(1, `fetching: ${fetchUrl}`)
+        let fetchObj = {};
 
-    let fetchObj = {}
-
-    // GET e DELETE non hanno body
-    if (method === 'GET' || method === 'DELETE') {
-        fetchObj = {
-            method: method,
-            headers: new Headers(headersObj),
+        // GET e DELETE non hanno body
+        if (method === 'GET' || method === 'DELETE') {
+            fetchObj = {
+                method: method,
+                headers: new Headers(headersObj),
+            };
+        } else {
+            fetchObj = {
+                method: method,
+                headers: new Headers(headersObj),
+                body: JSON.stringify(bodyObject),
+            };
         }
-    } else {
-        fetchObj = {
-            method: method,
-            headers: new Headers(headersObj),
-            body: JSON.stringify(bodyObject),
+
+        // Lancia il fetch
+        const response = await fetch(fetchUrl, fetchObj);
+
+        if (!response.ok) {
+            throw new Error('Errore nella response dal server!');
         }
+
+        // Restituisce il risultato parsato come JSON
+        const responseJSON = await response.json();
+        _D(3, responseJSON, 'fetchFunction - responseJSON')
+
+        return responseJSON;
+
+    } catch (error) {
+        // Gestione degli errori
+        sendAnAlert(`fetchFunction - Errore nel fetching dei dati: ${error.message}`, 'danger')
+        throw new Error('Errore durante il recupero dei dati del fetch');
     }
+}
 
-    // Lancia il fetch
-    return fetch(fetchUrl, fetchObj)
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error('Errore nella response dal server!');
-            }
-            return response.json(); // Restituisce un array se la risposta è un array
-        })
-        .catch((error) => {
-            console.error('Errore nella fetchFunction:', error);
-            throw error; // Rilancia l'errore per gestirlo all'esterno
-        });
-};
 
 
 // Ricerca un parametro dell'URL
 const getUrlParam = (param) => {
     const urlParams = new URLSearchParams(window.location.search);
     const paramValue = urlParams.get(param);
+
     _D(2, `url param '${param}': ${paramValue}`);
+
     return paramValue ? paramValue.trim() : null;
 };
 
@@ -188,53 +197,53 @@ const sortTable = (header) => {
 }
 
 
-// Funzione che attacca l'eventListener al form di ricerca
-document.getElementById('searchDiv').addEventListener('submit', (e) => {
-    e.preventDefault()
-})
-
-
 const applySearchFilter = async () => {
+    try {
+        // Esegui il fetch
+        apiItemsArray = await fetchFunction(fetchUrl, method, headersObj, bodyObject);
+        _D(3, apiItemsArray, 'applySearchFilter - apiItemsArray');
 
-    // Filtro l'array se c'è una ricerca generica dal form di ricerca
-    search = getUrlParam('search')
-    _D(1, `search: ${search}`)
-
-    // Eseguo il fetch
-    apiItemsArray = await fetchFunction(fetchUrl, method, headersObj, bodyObject)
-    _D(2, apiItemsArray, 'apiItemsArray')
-
-    // Filtro i record in base al parametro di ricerca
-    // La ricesca estesa permette di ricercare anche gli 'users'
-    if (getUrlParam('extensiveSearch') !== '1') {
-        apiItemsArray = search
-            ? apiItemsArray.filter((item) =>
-                (item._id.includes(search) ||
-                    item.name.toLowerCase().includes(search.toLowerCase()) ||
-                    item.brand.toLowerCase().includes(search.toLowerCase()) ||
-                    item.description.toLowerCase().includes(search.toLowerCase())
-                ) && !item.brand.toLowerCase().includes('user')
-            )
-            : apiItemsArray.filter((item) =>
-                !item.brand.toLowerCase().includes('user')
-            )
-    } else {
-        apiItemsArray = search
-            ? apiItemsArray.filter(
-                (item) =>
-                    item._id.includes(search) ||
-                    item.name.toLowerCase().includes(search.toLowerCase()) ||
-                    item.brand.toLowerCase().includes(search.toLowerCase()) ||
-                    item.description.toLowerCase().includes(search.toLowerCase())
-            )
-            : apiItemsArray;
-
+    } catch (error) {
+        // Gestione degli errori nel fetching
+        sendAnAlert(`applySearchFilter - Errore durante il fetch dei dati: ${error.message}`, 'danger');
+        throw new Error('Errore durante il recupero dei dati con l\'operazione di fetching.');
     }
 
-    // Popolo l'input field della ricerca così che l'utente si accorga che c'è una
-    // ricerca in corso (per una miglior UX)
-    search ? document.getElementById('searchInput').value = search : {}
-}
+    // Recupera il parametro di ricerca
+    const search = getUrlParam('search');
+    _D(1, `search: ${search}`);
+
+    // Converte il termine di ricerca in minuscolo se esiste
+    const searchLower = search ? search.toLowerCase() : '';
+
+    // Verifica se la ricerca estesa è attiva
+    const extensiveSearch = getUrlParam('extensiveSearch') === '1';
+
+    // Applica il filtro
+    apiItemsArray = apiItemsArray.filter((item) => {
+        // Controlla se il termine di ricerca corrisponde a uno dei campi
+        const matchesSearch = !search || (
+            item._id.includes(search) ||
+            item.name.toLowerCase().includes(searchLower) ||
+            item.brand.toLowerCase().includes(searchLower) ||
+            item.description.toLowerCase().includes(searchLower)
+        );
+
+        // Controlla se il brand non include "user"
+        const excludesUserBrand = !item.brand.toLowerCase().includes('user');
+
+        // Filtra in base alla modalità di ricerca
+        return extensiveSearch ? matchesSearch : matchesSearch && excludesUserBrand;
+    });
+
+    // Aggiorna il campo di ricerca per migliorare la UX
+    if (search) {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.value = search;
+        }
+    }
+};
 
 
 // Funzione che manda messaggi all'utente
@@ -244,6 +253,15 @@ const sendAnAlert = (message, level) => {
     document.getElementById('alertMessage').classList.toggle('d-none')
 }
 
+
+// Disattiva tutti i placeHolders. Serve per non doverli cercare uno via id
+const switchOffPlaceholders = () => {
+    Array.from(document.getElementsByClassName('waitPlaceholder')).forEach((waitPlaceholder) => {
+        waitPlaceholder.classList.add('d-none');
+    });
+};
+
+
 //
 // ***********************************************************************
 //
@@ -252,16 +270,7 @@ const sendAnAlert = (message, level) => {
 // ***********************************************************************
 //
 
-// let fetchUrl = 'https://striveschool-api.herokuapp.com/api/product/';
-// let method = 'GET';
-// let headersObj = {
-//     'Content-Type': 'application/json',
-//     'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzM3MDYyMDhhZDEyOTAwMTU4NzZiYzEiLCJpYXQiOjE3MzE2NTkyOTcsImV4cCI6MTczMjg2ODg5N30.jEpwONMXP3MP7pYQrrV_JAv-QZWy3LHpV6EI5_vNywc'
-// };
-// let bodyObject = { key: 'value' };
-// let apiResultArray;
-
-//debugLevel = 3
+debugLevel = 2
 
 
 //
@@ -272,18 +281,7 @@ const sendAnAlert = (message, level) => {
 // ***********************************************************************
 //
 
-// fetchFunction(fetchUrl, method, headersObj, bodyObject)
-//     .then((result) => {
-//         resultArray = result; // Assegna l'array alla variabile
-//         console.log('Array ricevuto:', resultArray);
-
-//         // Esempio di utilizzo dell'array
-//         if (Array.isArray(resultArray)) {
-//             resultArray.forEach(item => console.log(item));
-//         } else {
-//             console.warn('La risposta non è un array.');
-//         }
-//     })
-//     .catch((error) => {
-//         console.error('Errore nella chiamata:', error);
-//     });
+// Funzione che attacca l'eventListener al form di ricerca
+document.getElementById('searchDiv').addEventListener('submit', (e) => {
+    e.preventDefault()
+})

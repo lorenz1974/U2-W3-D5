@@ -55,7 +55,6 @@
 
                 <!-- Alert -->
                 <div id="alertMessage" class="alert d-none mt-5 mb-5" role="alert">
-                    ...
                 </div>
                 <!-- Alert -->
 
@@ -65,15 +64,23 @@
                     <div class="modal-dialog">
                         <div id="modalContent" class="modal-content">
                             <div class="modal-header">
-                                <h5 id="modalTitle" class="modal-title" id="imageModalLabel">Modal title</h5>
+                                <h5 id="modalTitle" class="modal-title" id="imageModalLabel">Waiting for info...</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>
                             <div id="modalBody" class="modal-body">
-                                ...
+
+                                <!-- Waiting placeholder -->
+                                <div class="waitPlaceholder d-flex flex-column" role="status">
+                                    <span class="placeholder w-50 mb-3"></span>
+                                    <span class="placeholder w-75 mb-3"></span>
+                                    <span class="placeholder w-25 mb-3"></span>
+                                </div>
+                                <!-- Waiting placeholder -->
+
                             </div>
                             <div id="imageModalFooter" class="modal-footer">
-                                ...
+                                <!-- ... -->
                             </div>
                         </div>
                     </div>
@@ -88,32 +95,13 @@
             <div class="container">
                 <div id="cardsDiv" class="row">
 
-                    <!--
-          <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-              <img src="https://picsum.photos/id/237/300/200" class="bd-placeholder-img card-img-top" />
-              <div class="card-body">
-                <h5 class="card-title">Lorem Ipsum</h5>
-                <p class="card-text">
-                  This is a wider card with supporting text below as a natural
-                  lead-in to additional content. This content is a little bit
-                  longer.
-                </p>
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-outline-secondary">
-                      View
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-secondary">
-                      Hide
-                    </button>
-                  </div>
-                  <small class="text-muted">9 mins</small>
-                </div>
-              </div>
-            </div>
-          </div>
-          -->
+                    <!-- Waiting placeholder -->
+                    <div class="waitPlaceholder d-flex flex-column" role="status">
+                        <span class="placeholder w-50 mb-3"></span>
+                        <span class="placeholder w-75 mb-3"></span>
+                        <span class="placeholder w-25 mb-3"></span>
+                    </div>
+                    <!-- Waiting placeholder -->
 
                 </div>
             </div>

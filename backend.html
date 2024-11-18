@@ -37,15 +37,24 @@
                 <div class="modal-dialog">
                     <div id="deleteModalContent" class="modal-content">
                         <div class="modal-header">
-                            <h5 id="deleteModalTitle" class="modal-title" id="deleteConfirmationModalLabel">Modal title
+                            <h5 id="deleteModalTitle" class="modal-title" id="deleteConfirmationModalLabel">Waiting for
+                                info...
                             </h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div id="deleteModalBody" class="modal-body">
-                            ...
+
+                            <!-- Waiting placeholder -->
+                            <div class="waitPlaceholder d-flex flex-column" role="status">
+                                <span class="placeholder w-50 mb-3"></span>
+                                <span class="placeholder w-75 mb-3"></span>
+                                <span class="placeholder w-25 mb-3"></span>
+                            </div>
+                            <!-- Waiting placeholder -->
+
                         </div>
                         <div id="deleteModalFooter" class="modal-footer">
-                            ...
+                            <!-- ... -->
                         </div>
                     </div>
                 </div>
@@ -57,23 +66,42 @@
             <form id="editModalForm">
                 <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel"
                     aria-hidden="true">
+
                     <div class="modal-dialog">
                         <div id="editModalContent" class="modal-content">
                             <div class="modal-header">
-                                <h5 id="editModalTitle" class="modal-title" id="editModalLabel">Modal title
+                                <h5 id="editModalTitle" class="modal-title" id="editModalLabel">Waiting for
+                                    info...
                                 </h5>
                                 <button id="modalEditCloseButton" type="button" class="btn-close"
                                     data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div id="editModalBody" class="modal-body">
-                                ...
-                            </div>
-                            <div id="editModalFooter" class="modal-footer">
-                                ...
+
+                            <div class="row">
+                                <div id="modalImage" class="col d-flex justify-content-center align-items-start mt-6">
+                                    <img width="300px" src="./assets/imgs/imgPlaceholder.jpg" alt="Placeholder">
+                                </div>
+                                <div class="col">
+                                    <div id="editModalBody" class="modal-body">
+
+                                        <!-- Waiting placeholder -->
+                                        <div class="waitPlaceholder d-flex flex-column" role="status">
+                                            <span class="placeholder w-50 mb-3"></span>
+                                            <span class="placeholder w-75 mb-3"></span>
+                                            <span class="placeholder w-25 mb-3"></span>
+                                        </div>
+                                        <!-- Waiting placeholder -->
+
+                                    </div>
+                                </div>
+
+
+                                <div id="editModalFooter" class="modal-footer">
+                                    <!-- ... -->
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
             </form>
             <!-- Edit Confirmation Modal -->
 
@@ -135,13 +163,13 @@
                 <tfoot></tfoot>
             </table>
 
-            <!-- spinner -->
-            <div id="waitPlaceholder" class="d-flex flex-column" role="status">
+            <!-- Waiting placeholder -->
+            <div class="waitPlaceholder d-flex flex-column d-none" role="status">
                 <span class="placeholder w-50 mb-3"></span>
                 <span class="placeholder w-75 mb-3"></span>
                 <span class="placeholder w-25 mb-3"></span>
             </div>
-            <!-- spinner -->
+            <!-- Waiting placeholder -->
 
         </div>
 

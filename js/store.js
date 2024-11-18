@@ -52,7 +52,7 @@ const drawAlbum = (htmReturn) => {
                                     id="buy-${apiItem._id}"
                                     class="btn btn-danger ms-2 p-0 py-1 px-2">
 
-                                    Buy It! (not yet active)
+                                    Buy It! (not active)
                                 </button>
                             </div>
 
@@ -80,15 +80,21 @@ const drawModal = async (modalId) => {
 
     // Setto il body del modale
     document.getElementById('modalBody').innerHTML = `
-        <img width="200px" src="${itemsDetails.imageUrl}" class="img-fluid">
-        <div class="w-50 mx-auto mt-2 text-start">
-        <p class="m-0 p-0"><span class="fw-bold">Category:</span> <span class="">${itemsDetails.brand} </span></p>
-            <p class="m-0 mt-3 p-0"><span class="fw-bold">Description:</span></p>
-            <p><span class=""> ${itemsDetails.description}</span></p>
-            <p class="mt-3 p-0"><span class="fw-bold">Price:</span></p>
-            <div class="d-flex justify-content-center align-items-center">
-                <span class="fw-bold fs-4">${itemsDetails.price.toFixed(2)} &euro;</span>
-                <button id="buy-${itemsDetails._id}" class="btn btn-danger ms-2 p-0 py-1 px-2">Buy It! (not yet active)</button>
+        <div class="row flex-column flex-lg-row">
+            <div class="col">
+                <img width="200px" src="${itemsDetails.imageUrl}" class="img-fluid">
+            </div>
+            <div class="col">
+                <div class="mx-auto mt-2 text-start">
+                    <p class="m-0 p-0"><span class="fw-bold">Category:</span> <span class="">${itemsDetails.brand} </span></p>
+                    <p class="m-0 mt-3 p-0"><span class="fw-bold">Description:</span></p>
+                    <p><span class=""> ${itemsDetails.description}</span></p>
+                    <p class="mt-3 p-0"><span class="fw-bold">Price:</span></p>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <p class="fw-bold fs-4 p-0 m-0 text-nowrap">${itemsDetails.price.toFixed(2)} &euro;</p>
+                        <button id="buy-${itemsDetails._id}" class="btn btn-danger ms-2 p-0 py-1 px-2 text-nowrap">Buy It! (not active)</button>
+                    </div>
+                </div>
             </div>
         </div>
     `;
@@ -120,8 +126,8 @@ let apiResultArray;
 let usersAutenticated = 0
 let search = ''
 
+// debugLevel = 3 // Definito in function.js
 
-debugLevel = 2
 
 //
 // ***********************************************************************
@@ -130,7 +136,6 @@ debugLevel = 2
 //
 // ***********************************************************************
 //
-
 
 document.addEventListener('DOMContentLoaded', async () => {
 
@@ -145,11 +150,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     drawHeaderAndFooter()
 
 
-    // Esegue la fetch e la ricerca sull'array dei dati
-    await applySearchFilter()
+    // Esegue la fetch e applica la ricerca sull'array dei dati
+    try {
+        await applySearchFilter();
+        _D(3, apiItemsArray, 'body.addEventListener - apiItemsArray');
+    } catch (error) {
+        sendAnAlert(`DOMContentLoaded - Errore durante il caricamento iniziale: ${error.message}`, 'danger');
+        throw new Error('Errore durante il caricamento iniziale');
+    }
 
-    // Manda un alert all'utente se non ci sono prodotti altrimenti disegno l'album
-    apiItemsArray.length === 0 ? sendAnAlert('No products found', 'warning') : drawAlbum()
+    // Disattivo il placeholder
+    switchOffPlaceholders();
+
+    // Verifica e gestisce i prodotti
+    if (apiItemsArray.length === 0) {
+        // Manda un alert all'utente se non ci sono prodotti altrimenti disegno l'album
+        sendAnAlert('No products found', 'warning');
+    } else {
+        // Disegno l'album delle carte
+        drawAlbum()
+    }
 
 
     // Event listener al click sul body
@@ -167,6 +187,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         switch (targetType) {
             case 'searchButton': {
                 const searchValue = document.getElementById('searchInput').value;
+
+                // Svuoto la tabella prima di ricaricare la pagina
+                document.getElementById('cardsDiv').innerHTML = ''
+
                 location.href = `${location.origin}${location.pathname}?search=${encodeURIComponent(searchValue)}`;
                 break;
             }
