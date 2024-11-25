@@ -64,32 +64,26 @@ const drawProductsTable = (htmReturn = false) => {
 
 
 // Disegno il modale per la conferma della cancellazione
-const drawConfirmationModal = (modalId) => {
+const drawConfirmationModal = async (modalId) => {
     try {
         // Recupera i dettagli dell'elemento tramite fetch
-        const itemsDetails = fetchFunction(`${fetchUrl}/${modalId}`, 'GET', headersObj);
+        const itemsDetails = await fetchFunction(`${fetchUrl}/${modalId}`, 'GET', headersObj);
         _D(2, itemsDetails, 'itemsDetails');
 
-    } catch (error) {
-        // Gestione errori
-        sendAnAlert(`drawConfirmationModal - Errore nel caricamento del modale: ${error.message}`, 'danger');
-        throw new Error('Errore nel caricamento del modale')
-    }
-
-    // Disattivo il placeholder
-    //switchOffPlaceholders();
+        // Disattivo il placeholder
+        //switchOffPlaceholders();
 
 
-    // Setta il titolo del modale
-    const modalTitle = document.getElementById('deleteModalTitle');
-    if (modalTitle) {
-        modalTitle.innerHTML = `CONFIRM DELETE ACTION`;
-    }
+        // Setta il titolo del modale
+        const modalTitle = document.getElementById('deleteModalTitle');
+        if (modalTitle) {
+            modalTitle.innerHTML = `CONFIRM DELETE ACTION`;
+        }
 
-    // Setta il body del modale
-    const modalBody = document.getElementById('deleteModalBody');
-    if (modalBody) {
-        modalBody.innerHTML = `
+        // Setta il body del modale
+        const modalBody = document.getElementById('deleteModalBody');
+        if (modalBody) {
+            modalBody.innerHTML = `
                 <h3 class="text-center text-danger">THIS PRODUCT IS GOING TO BE DELETED</h3>
                 <p class="m-0 mt-3 p-0"><span class="fw-bold">Name:</span> ${itemsDetails.name}</p>
                 <p class="m-0 mt-3 p-0"><span class="fw-bold">Description:</span></p>
@@ -97,16 +91,24 @@ const drawConfirmationModal = (modalId) => {
                 <p class="m-0 p-0"><span class="fw-bold">Category:</span> ${itemsDetails.brand}</p>
                 <p class="mt-3 p-0"><span class="fw-bold">Price:</span> <span class="fw-bold">${itemsDetails.price.toFixed(2)} &euro;</span></p>
             `;
-    }
+        }
 
-    // Setta il footer del modale
-    const modalFooter = document.getElementById('deleteModalFooter');
-    if (modalFooter) {
-        modalFooter.innerHTML = `
+        // Setta il footer del modale
+        const modalFooter = document.getElementById('deleteModalFooter');
+        if (modalFooter) {
+            modalFooter.innerHTML = `
                 <button id="deleteFromDatabase-${itemsDetails._id}" type="button" class="btn btn-danger" data-bs-dismiss="modal">DELETE</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CANCEL</button>
             `;
+        }
+
+    } catch (error) {
+        // Gestione errori
+        sendAnAlert(`drawConfirmationModal - Errore nel caricamento del modale: ${error.message}`, 'danger');
+        throw new Error('Errore nel caricamento del modale')
     }
+
+
 }
 
 
@@ -156,42 +158,65 @@ const drawEditModal = async (modalId) => {
     document.getElementById('editModalTitle').innerHTML = `CREATE/MODIFY A PRODUCT`;
 
     document.getElementById('editModalBody').innerHTML = `
-        <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="floatingId" placeholder="name" value="${itemsDetails._id}" disabled>
-            <label for="floatingId">Product ID</label>
-        </div>
-        <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="floatingName" placeholder="name" value="${itemsDetails.name}" required>
-            <label for="floatingName">Product name</label>
-            <div class="invalid-feedback">Please insert the product name.</div>
-        </div>
-        <div class="form-floating mb-3">
-            <textarea
-                rows="10"
-                class="form-control h-100"
-                id="floatingDescription"
-                placeholder="Description"
-                required>${itemsDetails.description.replace(/<br\s*\/?>/g, '\r\n')}</textarea>
-            <label for="floatingDescription">Description</label>
-        </div>
-        <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="floatingBrand" placeholder="Brand" value="${itemsDetails.brand}" required>
-            <label for="floatingBrand">Brand</label>
-        </div>
-        <div class="form-floating mb-3">
-            <input type="url" class="form-control" id="floatingImageUrl" placeholder="ImageUrl" value="${itemsDetails.imageUrl}" required>
-            <label for="floatingImageUrl">Insert the product image URL</label>
-        </div>
-        <div class="form-floating mb-3">
-            <input type="number" min="0" step="0.01"
-                class="form-control"
-                id="floatingPrice"
-                placeholder="Price"
-                value="${itemsDetails.price}"
-                required
-            >
-            <label for="floatingPrice">Price in Euro &euro;</label>
-        </div>
+
+            <!-- IMAGE COL -->
+            <div class="col-4 d-flex justify-content-center align-items-start flex-grow-0 px-2">
+                <img id="formImage" class="img-fluid border border-1 rounded rounded-1 " src="${modalId ? itemsDetails.imageUrl : './assets/imgs/imgPlaceholder.jpg'}">
+            </div>
+
+            <!-- FORM COL -->
+            <div class="col-8 d-flex flex-column">
+
+                <!-- ID -->
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="floatingId" placeholder="name" value="${itemsDetails._id}" disabled>
+                    <label for="floatingId">Product ID</label>
+                </div>
+
+                <!-- NAME -->
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="floatingName" placeholder="name" value="${itemsDetails.name}" required>
+                    <label for="floatingName">Product name</label>
+                    <div class="invalid-feedback">Please insert the product name.</div>
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div class="form-floating mb-3">
+                    <textarea
+                        rows="8"
+                        class="form-control h-100"
+                        id="floatingDescription"
+                        placeholder="Description"
+                        required>${itemsDetails.description.replace(/<br\s*\/?>/g, '\r\n')}</textarea>
+                    <label for="floatingDescription">Description</label>
+                </div>
+
+                <!-- BRAND -->
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="floatingBrand" placeholder="Brand" value="${itemsDetails.brand}" required>
+                    <label for="floatingBrand">Brand</label>
+                </div>
+
+                <!-- IMAGEURL -->
+                <div class="form-floating mb-3">
+                    <input type="url" class="form-control" id="floatingImageUrl" placeholder="ImageUrl" value="${itemsDetails.imageUrl}" required>
+                    <label for="floatingImageUrl">Insert the product image URL</label>
+                </div>
+
+                <!-- PRICE -->
+                <div class="form-floating mb-3">
+                    <input type="number" min="0" step="0.01"
+                        class="form-control"
+                        id="floatingPrice"
+                        placeholder="Price"
+                        value="${itemsDetails.price}"
+                        required
+                    >
+                    <label for="floatingPrice">Price in Euro &euro;</label>
+                </div>
+
+            <!-- FORM COL -->
+            </div>
     `;
 
     document.getElementById('editModalFooter').innerHTML = `
@@ -202,6 +227,8 @@ const drawEditModal = async (modalId) => {
         </button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CANCEL</button>
     `;
+
+    document.getElementById('floatingImageUrl').addEventListener('')
 };
 
 
@@ -402,6 +429,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             sendAnAlert(`Errore durante l'aggiornamento dei dati: ${error.message}`, 'danger');
         }
+    });
+
+    // Quando viene modificata l'immagine del prodotto mette subito l'immagine nella preview
+    document.getElementById('floatingImageUrl').addEventListener('change', (e) => {
+        const imageUrl = e.target.value;
+        document.getElementById('formImage').src = imageUrl;
     });
 
     // Attacca l'evento al click sull'intestazione della colonna della tabella prodotti
